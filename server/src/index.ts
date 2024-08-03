@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 
 import { connectDB } from "./config/dbConn";
-import routerSpotify from "./routes/auth/spotifyAuth";
 import routerCallback from "./routes/auth/callback";
 
 // Access env secrets
@@ -22,9 +21,6 @@ const app: Express = express();
 app.use(bodyParser.json());
 
 // Handle all API requests to server from ./src/api/routes.ts
-
-// Spotify Auth Route - Authorization
-app.use("/", routerSpotify);
 
 // Callback after authentication complete
 // Receives access token and refresh token

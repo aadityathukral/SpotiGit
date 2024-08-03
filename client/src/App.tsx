@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import NavBar from "./components/NavBar";
+import { handleLogin } from "./auth/handleLogin";
 
 const App = (): ReactElement => {
   return (
@@ -19,6 +20,9 @@ const App = (): ReactElement => {
       >
         Spotigit
       </NavBar>
+      <button onClick={handleLogin} className="text-white">
+        Log in
+      </button>
     </>
   );
 };
