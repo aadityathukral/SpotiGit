@@ -11,8 +11,11 @@ export const handleLogin = () => {
     scope:
       "ugc-image-upload playlist-read-private playlist-modify-private playlist-modify-public",
     state: state,
+    prompt: "login",
   });
 
   // Redirect to Authorization Page
-  window.location.href = `https://accounts.spotify.com/authorize?${urlSettings}`;
+  window.location.replace(
+    `https://accounts.spotify.com/authorize?${urlSettings}`
+  );
 };

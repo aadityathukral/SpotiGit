@@ -5,15 +5,22 @@ import { STATE, TOKEN_URI } from "../../config/spotifyOptions";
 import User from "../../models/User";
 import { isCorrectAccessTokenRes } from "../../config/customTypes";
 import dotenv from "dotenv";
+import { handleRefresh } from "./refresh";
+
 dotenv.config();
+
+export let ACCESS_TOKEN: string = "";
+export let REFRESH_TOKEN: string = "";
+export let EXPIRES_AT: number = -1;
 
 const routerCallback: Router = express.Router();
 const redirect_uri = process.env.REDIRECT_URI;
 const client_id = process.env.CLIENT_ID;
 const client_secret = process.env.CLIENT_SECRET;
-const redirect_client_uri = process.env.REDIRECT_CLIENT_URI;
+const redirect_client_uri = process.env.REDIRECT_CLIENT_URI as string;
 
 routerCallback.route("/").get(async (req: Request, res: Response) => {
+  console.log(ACCESS_TOKEN);
   if (!redirect_uri) {
     console.error("Redirect URI not working, fix dotenv");
     return;
@@ -52,84 +59,110 @@ routerCallback.route("/").get(async (req: Request, res: Response) => {
     return res.sendStatus(400);
   }
 
-  try {
-    // Requesting tokens at token URI
-    const authHeader: Headers = new Headers();
-    authHeader.append("Content-Type", "application/x-www-form-urlencoded");
-    authHeader.append(
-      "Authorization",
-      "Basic " + Buffer.from(client_id + ":" + client_secret).toString("base64")
-    );
-
-    const urlencodedBody: URLSearchParams = new URLSearchParams();
-    urlencodedBody.append("grant_type", "authorization_code");
-    urlencodedBody.append("code", code);
-    urlencodedBody.append("redirect_uri", redirect_uri);
-
-    // Making a post request to get access/refresh token
-    const response = await fetch(TOKEN_URI, {
-      method: "POST",
-      headers: authHeader,
-      body: urlencodedBody,
-    });
-
-    const data = await response.json();
-    // console.log(data);
-    if (!redirect_client_uri) {
-      console.error("Redirect Client URI not working, fix dotenv");
-      return;
-    }
-    if (!isCorrectAccessTokenRes(data)) {
-      console.error("Not the correct access token res");
-      return;
-    }
-    const access_token = data.access_token;
-    const refresh_token = data.refresh_token;
-    const expires_in = data.expires_in;
-
-    // Redirects to the client w/ React code etc
-    // Should I even be doing this over here?
-    // Not entirely sure
-
-    // TODO: Update this to something else later which will be more secure
-    // Preferably a session storage and do it in a diff file (getUserInfo)
-    // Put the action of creating a new User document into DB in another
-    // file.
-    const userInfoRaw = await fetch("https://api.spotify.com/v1/me", {
-      headers: {
-        Authorization: "Bearer " + access_token,
-      },
-    });
-
-    // TODO:
-    // Remove any type and add TypeScript functionality here
-    const userInfoJson: any = await userInfoRaw.json();
-    console.log(userInfoJson);
+  // Only request tokens if tokens have not already been set
+  // Basically request if its the first time
+  if (ACCESS_TOKEN === "" || EXPIRES_AT === -1) {
     try {
-      const user = await User.findOne({
-        spotifyUserId: userInfoJson.id,
-      }).exec();
-      // If user already exists in DB, don't create again
-      if (user) {
-        console.error("User already exists :OO");
+      // Requesting tokens at token URI
+      // Only need to request tokens if expired
+      //
+      // Otherwise can proceed with making requests
+      // And redirect to dashboard
+      const authHeader: Headers = new Headers();
+      authHeader.append("Content-Type", "application/x-www-form-urlencoded");
+      authHeader.append(
+        "Authorization",
+        "Basic " +
+          Buffer.from(client_id + ":" + client_secret).toString("base64")
+      );
+
+      const urlencodedBody: URLSearchParams = new URLSearchParams();
+      urlencodedBody.append("grant_type", "authorization_code");
+      urlencodedBody.append("code", code);
+      urlencodedBody.append("redirect_uri", redirect_uri);
+
+      // Making a post request to get access/refresh token
+      const response = await fetch(TOKEN_URI, {
+        method: "POST",
+        headers: authHeader,
+        body: urlencodedBody,
+      });
+
+      const data = await response.json();
+      // console.log(data);
+      if (!redirect_client_uri) {
+        console.error("Redirect Client URI not working, fix dotenv");
         return;
       }
-      await User.create({
-        username: userInfoJson.display_name,
-        access_token: access_token,
-        refresh_token: refresh_token,
-        expires_in: expires_in,
-        spotifyUserId: userInfoJson.id,
+      if (!isCorrectAccessTokenRes(data)) {
+        console.error("Not the correct access token res");
+        return;
+      }
+      ACCESS_TOKEN = data.access_token;
+      REFRESH_TOKEN = data.refresh_token;
+
+      // One hour from now, our access token expires
+      EXPIRES_AT = new Date().getTime() + 1000 * data.expires_in;
+      console.log(EXPIRES_AT);
+      // Redirects to the client w/ React code etc
+      // Should I even be doing this over here?
+      // Not entirely sure
+
+      // TODO: Update this to something else later which will be more secure
+      // Preferably a session storage and do it in a diff file (getUserInfo)
+      // Put the action of creating a new User document into DB in another
+      // file.
+
+      // TODO: This code needs to be moved to another file
+      const userInfoRaw = await fetch("https://api.spotify.com/v1/me", {
+        headers: {
+          Authorization: "Bearer " + ACCESS_TOKEN,
+        },
       });
+
+      // TODO:
+      // Remove any type and add TypeScript functionality here
+      const userInfoJson: any = await userInfoRaw.json();
+      // console.log(userInfoJson);
+      try {
+        const user = await User.findOne({
+          spotifyUserId: userInfoJson.id,
+        }).exec();
+        // If user already exists in DB, don't create again
+        if (user) {
+          console.error("User already exists :OO");
+          res.redirect(redirect_client_uri);
+          return;
+        }
+
+        await User.create({
+          username: userInfoJson.display_name,
+          access_token: ACCESS_TOKEN,
+          refresh_token: REFRESH_TOKEN,
+          expires_in: data.expires_in,
+          spotifyUserId: userInfoJson.id,
+        });
+      } catch (err) {
+        console.error(err);
+        return;
+      }
+      res.redirect(redirect_client_uri);
+      return;
     } catch (err) {
+      res.status(500).send(`Authentication failed.\nError: ${err}`);
       console.error(err);
       return;
     }
-    res.redirect(redirect_client_uri);
-  } catch (err) {
-    res.status(500).send(`Authentication failed.\nError: ${err}`);
-    console.error(err);
   }
+  // TODO: Check if access token expired
+  // Use Refresh Token to get new access token
+  // -> Use it to get a new access token
+
+  if (EXPIRES_AT > Date.now()) {
+    console.log("hello");
+    console.log(handleRefresh());
+  }
+  res.redirect(redirect_client_uri);
 });
 
 export default routerCallback;
