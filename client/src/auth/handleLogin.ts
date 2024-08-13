@@ -1,21 +1,9 @@
-import { generateRandomString } from "../utils";
+// TODO: Make it so that this will just call an endpoint
+// in the server which would handle this part of the functionality
+// and just return a json ({success: true}), once the json returns true
+// you could make another request to the server to obtain information about
+// the user (profile photo, name, etc).
 
 export const handleLogin = () => {
-  const clientId = import.meta.env.VITE_CLIENT_ID;
-  const redirectUri = import.meta.env.VITE_REDIRECT_URI;
-  const state = generateRandomString(16);
-  const urlSettings = new URLSearchParams({
-    response_type: "code",
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    scope:
-      "ugc-image-upload playlist-read-private playlist-modify-private playlist-modify-public",
-    state: state,
-    prompt: "login",
-  });
-
-  // Redirect to Authorization Page
-  window.location.replace(
-    `https://accounts.spotify.com/authorize?${urlSettings}`
-  );
+  window.location.href = "http://localhost:8080/login";
 };
