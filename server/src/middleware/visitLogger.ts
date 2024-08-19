@@ -8,13 +8,16 @@ const logVisit = async () => {
   try {
     if (!fs.existsSync(path.join(__dirname, "..", "logs"))) {
       await fsPromises.mkdir(path.join(__dirname, "..", "logs"));
+      await fsPromises.appendFile(
+        path.join(__dirname, "..", "logs", "sign-in-data.csv"),
+        "Date, Time\n"
+      );
     }
     const currDate: string = new Date().toISOString().split("T")[0];
     const currTime: string = new Date()
       .toISOString()
       .split("T")[1]
       .split(".")[0];
-    console.log(new Date().toISOString());
     const data: string = `${currDate}, ${currTime}\n`;
     await fsPromises.appendFile(
       path.join(__dirname, "..", "logs", "sign-in-data.csv"),
