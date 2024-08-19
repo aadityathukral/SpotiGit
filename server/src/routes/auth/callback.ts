@@ -2,7 +2,6 @@ import express, { Request, Response, Router } from "express";
 import querystring from "querystring";
 import { Buffer } from "node:buffer";
 import { STATE, TOKEN_URI } from "../../config/spotifyOptions";
-import User from "../../models/User";
 import { isCorrectAccessTokenRes } from "../../config/customTypes";
 import dotenv from "dotenv";
 
@@ -51,9 +50,6 @@ routerCallback.route("/").get(async (req: Request, res: Response) => {
     return res.sendStatus(400);
   }
 
-  // Only request tokens if tokens have not already been set
-  // Basically request if its the first time
-
   try {
     // Requesting tokens at token URI
     // Only need to request tokens if expired
@@ -80,7 +76,7 @@ routerCallback.route("/").get(async (req: Request, res: Response) => {
     });
 
     const data = await response.json();
-    // console.log(data);
+
     if (!redirect_client_uri) {
       console.error("Redirect Client URI not working, fix dotenv");
       return;
@@ -89,55 +85,24 @@ routerCallback.route("/").get(async (req: Request, res: Response) => {
       console.error("Not the correct access token res");
       return;
     }
-    (req.session as any).accessToken = data.access_token;
-    (req.session as any).refreshToken = data.refresh_token;
 
-    // One hour from now, our access token expires
-    (req.session as any).expiresAt =
-      new Date().getTime() + 1000 * data.expires_in;
-    console.log((req.session as any).expiresAt);
-    // Redirects to the client w/ React code etc
-    // Should I even be doing this over here?
-    // Not entirely sure
+    // TODO: This is a bit suspicious, how can you have req.session
+    // invalid in this case? Callback is triggered through browser
+    // and Node will validate a session here
 
-    // TODO: Update this to something else later which will be more secure
-    // Preferably a session storage and do it in a diff file (getUserInfo)
-    // Put the action of creating a new User document into DB in another
-    // file.
-
-    // TODO: This code needs to be moved to another file
-    const userInfoRaw = await fetch("https://api.spotify.com/v1/me", {
-      headers: {
-        Authorization: "Bearer " + (req.session as any).accessToken,
-      },
-    });
-
-    // TODO:
-    // Remove any type and add TypeScript functionality here
-    const userInfoJson: any = await userInfoRaw.json();
-    // console.log(userInfoJson);
-    try {
-      const user = await User.findOne({
-        spotifyUserId: userInfoJson.id,
-      }).exec();
-      // If user already exists in DB, don't create again
-      if (user) {
-        console.error("User already exists :OO");
-        res.redirect(redirect_client_uri);
-        return;
-      }
-
-      await User.create({
-        username: userInfoJson.display_name,
-        access_token: (req.session as any).accessToken,
-        refresh_token: (req.session as any).refreshToken,
-        expires_in: data.expires_in,
-        spotifyUserId: userInfoJson.id,
-      });
-    } catch (err) {
-      console.error(err);
+    // This is an impossible case:
+    if (!req.session) {
+      console.error("Session not set");
+      res.status(401).json({ signedIn: false }); // Illegal Source / Unauthorized
       return;
     }
+    req.session.accessToken = data.access_token;
+    req.session.refreshToken = data.refresh_token;
+
+    // One hour from now, our access token expires
+    req.session.expiresAt = new Date().getTime() + 1000 * data.expires_in;
+    console.log(req.session);
+
     res.redirect(redirect_client_uri);
     return;
   } catch (err) {
@@ -145,16 +110,6 @@ routerCallback.route("/").get(async (req: Request, res: Response) => {
     console.error(err);
     return;
   }
-
-  // TODO: Check if access token expired
-  // Use Refresh Token to get new access token
-  // -> Use it to get a new access token
-
-  // if (req.session.expiresAt > Date.now()) {
-  //   console.log("hello");
-  //   console.log(handleRefresh());
-  // }
-  // res.redirect(redirect_client_uri);
 });
 
 export default routerCallback;

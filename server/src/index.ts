@@ -9,7 +9,8 @@ import routerCallback from "./routes/auth/callback";
 import routerLogin from "./routes/auth/login";
 import credentials from "./middleware/credentials";
 import corsOptions from "./config/corsOptions";
-import routerRefresh from "./routes/auth/refresh";
+import routerUserInfo from "./routes/api/getUserInfo";
+import { logger } from "./middleware/visitLogger";
 
 // Access env secrets
 dotenv.config();
@@ -46,7 +47,7 @@ app.use(
     cookie: {
       secure: process.env.CURR_MODE === "production",
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // Session lasts for 1 day
     },
   })
 );
@@ -58,8 +59,11 @@ app.use(
 
 app.use("/login", routerLogin);
 
+app.use(logger);
+
 // Callback after authentication complete
 // Receives access token and refresh token
 app.use("/callback", routerCallback);
 
-app.use("/refresh", routerRefresh);
+// Gets the userInfo
+app.use("/getUserInfo", routerUserInfo);
