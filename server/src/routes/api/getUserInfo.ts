@@ -22,7 +22,7 @@ routerUserInfo.route("/").get(async (req: Request, res: Response) => {
     return;
   }
   if (req.session.expiresAt < new Date().getTime()) {
-    refresh(
+    await refresh(
       req.session.refreshToken,
       (authInfo: { accessToken: string; expiresAt: number }) => {
         if (!req.session) {
@@ -36,9 +36,16 @@ routerUserInfo.route("/").get(async (req: Request, res: Response) => {
   }
   const userInfoRaw = await fetch("https://api.spotify.com/v1/me", {
     headers: {
-      Authorization: "Bearer " + (req.session as any).accessToken,
+      Authorization: "Bearer " + req.session.accessToken,
     },
   });
+
+  if (userInfoRaw.status === 401) {
+    console.error("Spotify API returned 401 Unauthorized. Invalid token?");
+    res.status(401).json({ signedIn: false });
+    return;
+  }
+
   const userInfoJson: any = await userInfoRaw.json();
   console.log(userInfoJson);
   // Send relevant user info back to client: Profile name, Profile Photo, Playlists
@@ -46,6 +53,7 @@ routerUserInfo.route("/").get(async (req: Request, res: Response) => {
   res.status(200).json({
     display_name: userInfoJson.display_name,
     profile_photo: userInfoJson.images[0].url,
+    signedIn: true,
   });
 });
 

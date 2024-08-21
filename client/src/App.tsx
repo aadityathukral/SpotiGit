@@ -1,8 +1,27 @@
-import { ReactElement } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import NavBar from "./components/NavBar";
 import { handleLogin } from "./auth/handleLogin";
+import { loadUserInfo, loadUserInfoData } from "./server";
+import Button from "./components/Button";
 
 const App = (): ReactElement => {
+  const loadUserInfoCallback = (data: loadUserInfoData) => {
+    setSignedIn(data.signedIn);
+    if (data.display_name && data.profile_photo) {
+      setDisplayName(data.display_name);
+      setProfilePhoto(data.profile_photo);
+    }
+  };
+
+  // TODO: Move functionality to another component
+  const [profilePhoto, setProfilePhoto] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [signedIn, setSignedIn] = useState(false);
+
+  useEffect(() => {
+    console.log("useEffect ran");
+    loadUserInfo(loadUserInfoCallback);
+  }, []);
   return (
     <>
       {/* Image string to be provided with no path 
@@ -20,9 +39,14 @@ const App = (): ReactElement => {
       >
         Spotigit
       </NavBar>
-      <button onClick={handleLogin} className="text-white">
-        Log in
-      </button>
+      {!signedIn ? (
+        <Button text="Log In" color="text-white" onClick={handleLogin} />
+      ) : (
+        <>
+          <img src={profilePhoto} alt="Profile Photo of user" />
+          <h1 className="text-white">{displayName}</h1>
+        </>
+      )}
     </>
   );
 };

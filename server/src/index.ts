@@ -11,6 +11,7 @@ import credentials from "./middleware/credentials";
 import corsOptions from "./config/corsOptions";
 import routerUserInfo from "./routes/api/getUserInfo";
 import { logger } from "./middleware/visitLogger";
+import routerSessionClear from "./routes/auth/clearSession";
 
 // Access env secrets
 dotenv.config();
@@ -57,13 +58,14 @@ app.use(
 
 // Handle all API requests to server from ./src/api/routes.ts
 
-app.use("/login", routerLogin);
+app.use("/sessionClear", routerSessionClear);
 
-app.use(logger);
+app.use("/login", routerLogin);
 
 // Callback after authentication complete
 // Receives access token and refresh token
 app.use("/callback", routerCallback);
 
+app.use(logger);
 // Gets the userInfo
 app.use("/getUserInfo", routerUserInfo);

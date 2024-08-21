@@ -4,6 +4,17 @@
 // you could make another request to the server to obtain information about
 // the user (profile photo, name, etc).
 
+// TODO: Look into this further
+
 export const handleLogin = () => {
-  window.location.href = "http://localhost:8080/login";
+  fetch("http://localhost:8080/sessionClear", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then(() => {
+      window.location.href = "http://localhost:8080/login";
+    })
+    .catch((err) => {
+      console.error(`Unable to clear the session. Error: ${err}`);
+    });
 };
