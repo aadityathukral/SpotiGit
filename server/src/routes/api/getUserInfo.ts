@@ -22,6 +22,7 @@ routerUserInfo.route("/").get(async (req: Request, res: Response) => {
     return;
   }
   if (req.session.expiresAt < new Date().getTime()) {
+    // Refresh tokens
     await refresh(
       req.session.refreshToken,
       (authInfo: { accessToken: string; expiresAt: number }) => {

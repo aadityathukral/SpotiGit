@@ -25,11 +25,6 @@ export const refresh = async (refreshToken: string, cb: RefreshCallback) => {
     "Basic " + Buffer.from(client_id + ":" + client_secret).toString("base64")
   );
 
-  // TODO: Write this better
-  if (!refreshToken) {
-    console.error("What the haell");
-    return;
-  }
   const body: URLSearchParams = new URLSearchParams();
   body.append("grant_type", "refresh_token");
   body.append("refresh_token", refreshToken);

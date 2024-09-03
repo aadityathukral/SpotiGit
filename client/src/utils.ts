@@ -1,4 +1,8 @@
-/** Generates a random string */
+/**
+ * Generates a random string.
+ *  @param length the length of string to generate
+ *  @return random string of length size
+ */
 export const generateRandomString = (length: number): string => {
   let result = "";
   const characters =

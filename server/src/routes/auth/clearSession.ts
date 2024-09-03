@@ -7,6 +7,7 @@ routerSessionClear.route("/").post((req, res) => {
     res.status(200).send("No session found");
     return;
   }
+  // Clear out the session
   req.session.destroy((err) => {
     if (err) {
       res.status(500).send(`Unable to clear the session. Error: ${err}`);

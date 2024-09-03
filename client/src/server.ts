@@ -15,6 +15,7 @@ export const loadUserInfo = async (cb: loadUserInfoCallback) => {
     });
     console.log(response);
     if (response.status === 401) {
+      // Unauthorized
       cb({ signedIn: false });
       return;
     }

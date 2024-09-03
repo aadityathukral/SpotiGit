@@ -1,5 +1,6 @@
 import * as mongoose from "mongoose";
 
+/** Method to connect to the database */
 export const connectDB = async () => {
   if (!process.env.DATABASE_URI) {
     console.error(`URI not defined, could not connect`);

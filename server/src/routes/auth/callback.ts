@@ -102,7 +102,6 @@ routerCallback.route("/").get(async (req: Request, res: Response) => {
     // One hour from now, our access token expires
     req.session.expiresAt = new Date().getTime() + 1000 * data.expires_in;
     console.log(req.session);
-
     res.redirect(redirect_client_uri);
     return;
   } catch (err) {

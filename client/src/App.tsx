@@ -18,8 +18,8 @@ const App = (): ReactElement => {
   const [displayName, setDisplayName] = useState("");
   const [signedIn, setSignedIn] = useState(false);
 
+  // Get the user information
   useEffect(() => {
-    console.log("useEffect ran");
     loadUserInfo(loadUserInfoCallback);
   }, []);
   return (
@@ -42,6 +42,7 @@ const App = (): ReactElement => {
       {!signedIn ? (
         <Button text="Log In" color="text-white" onClick={handleLogin} />
       ) : (
+        // TODO: Create a separate component for this
         <>
           <img src={profilePhoto} alt="Profile Photo of user" />
           <h1 className="text-white">{displayName}</h1>

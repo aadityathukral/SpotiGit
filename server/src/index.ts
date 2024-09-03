@@ -53,11 +53,6 @@ app.use(
   })
 );
 
-// TODO: Make a sign-in logger, which will track the time
-// of visiting the site as well as location
-
-// Handle all API requests to server from ./src/api/routes.ts
-
 app.use("/sessionClear", routerSessionClear);
 
 app.use("/login", routerLogin);
@@ -66,6 +61,8 @@ app.use("/login", routerLogin);
 // Receives access token and refresh token
 app.use("/callback", routerCallback);
 
+// Middleware tracking logins from users
 app.use(logger);
+
 // Gets the userInfo
 app.use("/getUserInfo", routerUserInfo);

@@ -30,7 +30,7 @@ const logVisit = async () => {
 };
 
 /** Logger middleware which tracks users when they access server */
-export const logger = (req: Request, res: Response, next: NextFunction) => {
+export const logger = (_req: Request, _res: Response, next: NextFunction) => {
   logVisit();
   console.log("Logging new user...");
   next();
