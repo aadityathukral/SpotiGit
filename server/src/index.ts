@@ -12,9 +12,16 @@ import corsOptions from "./config/corsOptions";
 import routerUserInfo from "./routes/api/getUserInfo";
 import { logger } from "./middleware/visitLogger";
 import routerSessionClear from "./routes/auth/clearSession";
+import { createClient } from "redis";
+import RedisStore from "connect-redis";
 
 // Access env secrets
 dotenv.config();
+
+// TODO: Fix Redis Issue
+
+// // @ts-ignore
+// const redisStore = new RedisStore({ client: redisClient });
 
 // Configuring and starting HTTP server
 const port: number = Number(process.env.PORT) || 8080;
@@ -41,7 +48,7 @@ app.use(bodyParser.json());
 // TODO: Fix Redis Issue
 app.use(
   session({
-    // store: new RedisStore({ client: redisClient }),
+    // store: redisStore,
     secret: process.env.SESSION_SECRET as string,
     resave: false,
     saveUninitialized: false,

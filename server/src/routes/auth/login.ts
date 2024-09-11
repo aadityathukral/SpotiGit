@@ -20,6 +20,7 @@ routerLogin.route("/").get((_req: Request, res: Response) => {
         redirect_uri: redirect_uri,
         state: STATE,
         prompt: "consent",
+        show_dialog: true,
       })
   );
 });
