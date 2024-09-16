@@ -42,3 +42,35 @@ export const loadUserInfo = async (cb: loadUserInfoCallback) => {
     return;
   }
 };
+
+type loadUserPlaylistsCallback = (playlists: loadUserPlaylistsData) => void;
+
+type loadUserPlaylistsData = {
+  signedIn: boolean;
+  items?: any; // TODO: Change this later and make it more specific
+};
+
+// TODO: Write this method better, currently set as such due to testing
+export const loadUserPlaylists = async (cb: loadUserPlaylistsCallback) => {
+  try {
+    const response = await fetch("http://localhost:8080/getUserPlaylists", {
+      credentials: "include",
+    });
+    if (response.status == 401) {
+      // Unauthorized
+      cb({ signedIn: false });
+      return;
+    }
+    const jsonRes: any = await response.json();
+    if (!isRecord(jsonRes)) {
+      console.error("Invalid json from /getUserInfo");
+      return;
+    }
+    cb({ signedIn: true, items: jsonRes.items });
+    console.log(response);
+  } catch (err) {
+    console.error(
+      `Error fetching user playlists (or converting to json): ${err}`
+    );
+  }
+};

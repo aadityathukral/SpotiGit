@@ -2,6 +2,8 @@ import { ReactElement, useEffect, useState } from "react";
 import { handleLogin } from "./auth/handleLogin";
 import { loadUserInfo, loadUserInfoData } from "./server";
 import NavigationBar from "./components/NavigationBar";
+import AppDescription from "./components/AppDescription";
+import { handlePlaylists } from "./handlePlaylists";
 
 const App = (): ReactElement => {
   const loadUserInfoCallback = (data: loadUserInfoData) => {
@@ -18,7 +20,12 @@ const App = (): ReactElement => {
   }, []);
   return (
     <>
-      <NavigationBar onLoginClicked={handleLogin} profilePhoto={profilePhoto} />
+      <NavigationBar
+        onLoginClicked={handleLogin}
+        profilePhoto={profilePhoto}
+        onPlaylistsClicked={handlePlaylists}
+      />
+      <AppDescription />
     </>
   );
 };

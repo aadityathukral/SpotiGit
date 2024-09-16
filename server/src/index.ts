@@ -14,6 +14,7 @@ import { logger } from "./middleware/visitLogger";
 import routerSessionClear from "./routes/auth/clearSession";
 import { createClient } from "redis";
 import RedisStore from "connect-redis";
+import routerUserPlaylists from "./routes/api/getUserPlaylists";
 
 // Access env secrets
 dotenv.config();
@@ -73,3 +74,5 @@ app.use(logger);
 
 // Gets the userInfo
 app.use("/getUserInfo", routerUserInfo);
+
+app.use("/getUserPlaylists", routerUserPlaylists);
