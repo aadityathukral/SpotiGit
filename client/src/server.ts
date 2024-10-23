@@ -10,7 +10,7 @@ export type loadUserInfoData = {
 
 export const loadUserInfo = async (cb: loadUserInfoCallback) => {
   try {
-    const response = await fetch("http://localhost:8080/getUserInfo", {
+    const response = await fetch("http://localhost:8080/users/info", {
       credentials: "include", // Cookies to be included since sessions being used
     });
     console.log(response);
