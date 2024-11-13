@@ -1,16 +1,38 @@
 import { ReactElement } from "react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router";
 
 export default function NavigationBar(props: {
   onLoginClicked: () => void;
   onPlaylistsClicked: () => void;
   profilePhoto: string;
 }): ReactElement {
+  const nav = useNavigate();
+  const handleTC = () => {
+    nav("/terms");
+  };
+  const renderProfileSection = () => {
+    return props.profilePhoto ? (
+      <img
+        src={props.profilePhoto}
+        alt="Profile"
+        className="w-10 h-10 rounded-full"
+      />
+    ) : (
+      <Button
+        className="bg-[#1BB954] text-[#191414] hover:bg-[#1BB954]/80"
+        onClick={props.onLoginClicked}
+      >
+        Login
+      </Button>
+    );
+  };
+
   return (
     <div className="flex items-center justify-between p-4 bg-[#191414] text-white">
       <div className="flex items-center space-x-4">
         <img
-          src="../../../spotify_alt.png"
+          src="/spotify_alt.png"
           className="w-10 h-10 bg-[#1BB954] rounded-full"
           alt="Spotigit logo"
         />
@@ -20,41 +42,26 @@ export default function NavigationBar(props: {
       <div className="flex space-x-4">
         <Button
           variant="ghost"
-          className="text-white hover:bg-[#1BB954] hover:text-white focus:bg-[#1BB954] focus:text-white"
-          asChild
+          className="text-white hover:bg-[#1BB954]"
+          onClick={props.onPlaylistsClicked}
         >
-          <button>Your Playlists</button>
+          Your Playlists
+        </Button>
+        <Button variant="ghost" className="text-white hover:bg-[#1BB954]">
+          Tracked Playlists
         </Button>
         <Button
           variant="ghost"
-          className="text-white hover:bg-[#1BB954] hover:text-white focus:bg-[#1BB954] focus:text-white"
+          className="text-white hover:bg-[#1BB954]"
+          onClick={handleTC}
         >
-          <button>Tracked Playlists</button>
-        </Button>
-        <Button
-          variant="ghost"
-          className="text-white hover:bg-[#1BB954] hover:text-white focus:bg-[#1BB954] focus:text-white"
-        >
-          <button>Terms And Conditions</button>
+          Terms And Conditions
         </Button>
       </div>
 
-      {props.profilePhoto !== "" ? (
-        <div className="flex items-center space-x-4">
-          <img
-            src={props.profilePhoto}
-            alt="Your profile photo"
-            className="w-10 h-10 bg-[#1BB954] rounded-full"
-          />
-        </div>
-      ) : (
-        <Button
-          className="bg-[#1BB954] text-[#191414] hover:bg-[#1BB954]/80"
-          onClick={props.onLoginClicked}
-        >
-          Login
-        </Button>
-      )}
+      <div className="flex items-center space-x-4">
+        {renderProfileSection()}
+      </div>
     </div>
   );
 }
