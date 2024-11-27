@@ -9,12 +9,10 @@ import routerCallback from "./routes/auth/callback";
 import routerLogin from "./routes/auth/login";
 import credentials from "./middleware/credentials";
 import corsOptions from "./config/corsOptions";
-// import routerUserInfo from "./routes/api/getUserInfo";
 import { logger } from "./middleware/visitLogger";
 import routerSessionClear from "./routes/auth/clearSession";
 import { createClient } from "redis";
 import RedisStore from "connect-redis";
-// import routerUserPlaylists from "./routes/api/getUserPlaylists";
 import { sessionValid } from "./middleware/sessionValid";
 import routerUser from "./routes/api/user";
 
@@ -71,11 +69,8 @@ app.use("/login", routerLogin);
 // Receives access token and refresh token
 app.use("/callback", routerCallback);
 
-// Middleware tracking logins from users
-app.use(logger);
+// TODO: Use the logger elsewhere + log relevant information
+// app.use(logger);
 
 // Gets the userInfo
-app.use("/users", sessionValid, routerUser);
-// app.use("/getUserInfo", sessionValid, routerUserInfo);
-
-// app.use("/getUserPlaylists", sessionValid, routerUserPlaylists);
+app.use("/user", routerUser);

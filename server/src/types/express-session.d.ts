@@ -6,5 +6,6 @@ declare module "express-session" {
     accessToken?: string;
     refreshToken?: string;
     expiresAt?: number;
+    user_id?: string;
   }
 }
