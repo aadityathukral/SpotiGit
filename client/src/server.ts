@@ -10,7 +10,7 @@ export type loadUserInfoData = {
 
 export const loadUserInfo = async (cb: loadUserInfoCallback) => {
   try {
-    const response = await fetch("http://localhost:8080/users/info", {
+    const response = await fetch("http://localhost:8080/user/info", {
       credentials: "include", // Cookies to be included since sessions being used
     });
     console.log(response);
@@ -45,7 +45,7 @@ export const loadUserInfo = async (cb: loadUserInfoCallback) => {
 
 type loadUserPlaylistsCallback = (playlists: loadUserPlaylistsData) => void;
 
-type loadUserPlaylistsData = {
+export type loadUserPlaylistsData = {
   signedIn: boolean;
   items?: any; // TODO: Change this later and make it more specific
 };
@@ -53,7 +53,7 @@ type loadUserPlaylistsData = {
 // TODO: Write this method better, currently set as such due to testing
 export const loadUserPlaylists = async (cb: loadUserPlaylistsCallback) => {
   try {
-    const response = await fetch("http://localhost:8080/getUserPlaylists", {
+    const response = await fetch("http://localhost:8080/user/playlists", {
       credentials: "include",
     });
     if (response.status == 401) {
@@ -66,11 +66,20 @@ export const loadUserPlaylists = async (cb: loadUserPlaylistsCallback) => {
       console.error("Invalid json from /getUserInfo");
       return;
     }
-    cb({ signedIn: true, items: jsonRes.items });
-    console.log(response);
+    cb({ signedIn: true, items: jsonRes.playlists });
   } catch (err) {
     console.error(
       `Error fetching user playlists (or converting to json): ${err}`
     );
   }
 };
+
+// TODO: Create functionality for additional info about each playlist
+// type loadPlaylistCallback = (playlist: loadUserPlaylistsData) => void;
+
+// export type loadPlaylistData = {
+//   signedIn: boolean;
+//   items?: any; // TODO: Change this later and make it more specific
+// };
+
+// export const loadPlaylist = async (id: string, cb: loadPlaylistCallback) => {};

@@ -11,6 +11,7 @@ import NavigationBar from "./components/NavigationBar";
 import LoginPage from "./pages/LoginPage"; // Create a new login component
 import HomePage from "./pages/HomePage"; // Create a new home component
 import TermsPage from "./pages/TermsPage";
+import PlaylistsPage from "./pages/PlaylistsPage";
 
 const App = (): ReactElement => {
   const [profilePhoto, setProfilePhoto] = useState("");
@@ -31,11 +32,7 @@ const App = (): ReactElement => {
 
   return (
     <Router>
-      <NavigationBar
-        onLoginClicked={handleLogin}
-        profilePhoto={profilePhoto}
-        onPlaylistsClicked={() => {}} // Define your playlists handler
-      />
+      <NavigationBar onLoginClicked={handleLogin} profilePhoto={profilePhoto} />
       <Routes>
         <Route
           path="/login"
@@ -45,6 +42,7 @@ const App = (): ReactElement => {
           path="/home"
           element={isSignedIn ? <HomePage /> : <Navigate to="/login" />}
         />
+        <Route path="/playlists" element={<PlaylistsPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
