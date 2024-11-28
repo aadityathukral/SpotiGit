@@ -39,11 +39,12 @@ export const getUserPlaylists = async (req: Request, res: Response) => {
   }
 
   const userPlaylistsJson: any = await userPlaylistsRaw.json();
-  console.log(userPlaylistsJson);
+  // console.log(userPlaylistsJson);
   // Send relevant user info back to client: Profile name, Profile Photo, Playlists
   const filteredPlaylists: any = userPlaylistsJson.items.filter(
-    (playlist: any) => playlist.owner.id === session.user_id
+    (playlist: any) => playlist && playlist.owner.id === session.user_id
   );
+  // console.log(filteredPlaylists);
   res.status(200).json({
     playlists: filteredPlaylists,
   });
@@ -64,7 +65,7 @@ export const getUserInfo = async (req: Request, res: Response) => {
   }
 
   const userInfoJson: any = await userInfoRaw.json();
-  console.log(userInfoJson);
+  // console.log(userInfoJson);
   req.session!.user_id = userInfoJson.id;
   // Send relevant user info back to client: Profile name, Profile Photo, Playlists
 

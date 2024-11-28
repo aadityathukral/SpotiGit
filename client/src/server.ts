@@ -50,7 +50,6 @@ export type loadUserPlaylistsData = {
   items?: any; // TODO: Change this later and make it more specific
 };
 
-// TODO: Write this method better, currently set as such due to testing
 export const loadUserPlaylists = async (cb: loadUserPlaylistsCallback) => {
   try {
     const response = await fetch("http://localhost:8080/user/playlists", {
@@ -71,6 +70,61 @@ export const loadUserPlaylists = async (cb: loadUserPlaylistsCallback) => {
     console.error(
       `Error fetching user playlists (or converting to json): ${err}`
     );
+  }
+};
+
+type Track = {
+  added_at: string;
+  track: {
+    name: string;
+    artists: { name: string }[];
+    album: {
+      name: string;
+      images: { url: string }[];
+    };
+    duration_ms: number;
+  };
+};
+
+type loadPlaylistTracksCallback = (data: loadPlaylistTracksData) => void;
+
+export type loadPlaylistTracksData = {
+  signedIn: boolean;
+  items?: Track[];
+};
+
+export const loadPlaylistTracks = async (
+  href: string,
+  cb: loadPlaylistTracksCallback
+) => {
+  try {
+    const response = await fetch("http://localhost:8080/playlist/tracks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ href: href }),
+      credentials: "include",
+    });
+
+    if (response.status === 401) {
+      // Unauthorized
+      cb({ signedIn: false });
+      return;
+    }
+    console.log(`This is the loadPlaylistTracks response`, response);
+    const jsonRes: any = await response.json();
+    if (!isRecord(jsonRes)) {
+      console.error("Invalid json from /playlist/tracks");
+      return;
+    }
+    console.log(jsonRes);
+    cb({ signedIn: true, items: jsonRes.items as any });
+  } catch (err) {
+    console.error(
+      `Error fetching playlist tracks (or converting to json): ${err}`
+    );
+    cb({ signedIn: true, items: [] });
   }
 };
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { loadUserPlaylists, loadUserPlaylistsData } from "../server";
+import { PlaylistDetailsDialog } from "../components/PlaylistDetailsDialog";
 
 type Playlist = {
   id: string;
@@ -15,6 +16,7 @@ type Playlist = {
   };
   tracks: {
     total: number;
+    href: string;
   };
   images: { url: string }[] | null;
 };
@@ -23,6 +25,9 @@ export default function PlaylistsPage() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(
+    null
+  );
 
   useEffect(() => {
     fetchPlaylists();
@@ -57,11 +62,7 @@ export default function PlaylistsPage() {
   };
 
   const startTracking = async (playlistId: string) => {
-    // TODO: Implement the actual tracking logic here
     console.log(`Start tracking playlist: ${playlistId}`);
-    // You would typically make an API call here to your backend
-    // to start tracking the playlist in your version control system
-    // For now, we'll just log to the console
   };
 
   if (isLoading) {
@@ -95,10 +96,11 @@ export default function PlaylistsPage() {
         {playlists.map((playlist) => (
           <Card
             key={playlist.id}
-            className="bg-[#181818] text-whitespotify border-none overflow-hidden transition-all duration-300 ease-in-out hover:bg-[#282828] hover:shadow-lg group"
+            className="bg-[#181818] text-whitespotify border-none overflow-hidden transition-all duration-300 ease-in-out hover:bg-[#282828] hover:shadow-lg cursor-pointer"
+            onClick={() => setSelectedPlaylist(playlist)}
           >
-            <div className="p-4">
-              <div className="relative aspect-square w-full mb-4 overflow-hidden rounded-md group-hover:shadow-md">
+            <CardContent className="p-4">
+              <div className="relative aspect-square w-full mb-4 overflow-hidden rounded-md">
                 {playlist.images && playlist.images[0] ? (
                   <img
                     src={playlist.images[0].url}
@@ -110,41 +112,27 @@ export default function PlaylistsPage() {
                     <span className="text-greenspotify text-4xl">♪</span>
                   </div>
                 )}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                  <Button
-                    className="bg-greenspotify text-blackspotify hover:bg-[#1ED760] font-semibold px-4 py-2 rounded-full transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 ease-in-out"
-                    onClick={() =>
-                      window.open(playlist.external_urls.spotify, "_blank")
-                    }
-                  >
-                    Open in Spotify
-                  </Button>
-                </div>
               </div>
-              <h3 className="font-bold text-lg mb-1 truncate group-hover:text-greenspotify transition-colors duration-300">
+              <h3 className="font-bold text-lg mb-1 truncate">
                 {playlist.name}
               </h3>
               <p className="text-sm text-[#b3b3b3] mb-2">
                 By {playlist.owner.display_name}
               </p>
-              <p className="text-sm text-[#b3b3b3] mb-2">
+              <p className="text-sm text-[#b3b3b3]">
                 {playlist.tracks.total} tracks
               </p>
-              {playlist.description && (
-                <p className="text-sm text-[#b3b3b3] mb-4 line-clamp-2">
-                  {playlist.description}
-                </p>
-              )}
-              <Button
-                className="w-full bg-[#1DB954] text-white hover:bg-[#1ED760] font-semibold transition-all duration-300 ease-in-out mt-2"
-                onClick={() => startTracking(playlist.id)}
-              >
-                Start Tracking
-              </Button>
-            </div>
+            </CardContent>
           </Card>
         ))}
       </div>
+      {selectedPlaylist && (
+        <PlaylistDetailsDialog
+          playlist={selectedPlaylist}
+          onClose={() => setSelectedPlaylist(null)}
+          startTracking={startTracking}
+        />
+      )}
     </div>
   );
 }

@@ -15,6 +15,7 @@ import { createClient } from "redis";
 import RedisStore from "connect-redis";
 import { sessionValid } from "./middleware/sessionValid";
 import routerUser from "./routes/api/user";
+import routerPlaylist from "./routes/api/playlist";
 
 // Access env secrets
 dotenv.config();
@@ -74,3 +75,5 @@ app.use("/callback", routerCallback);
 
 // Gets the userInfo
 app.use("/user", routerUser);
+
+app.use("/playlist", routerPlaylist);
