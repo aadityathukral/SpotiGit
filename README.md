@@ -25,17 +25,18 @@
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/spotigit.git
-   cd spotigit
+   git clone https://github.com/aadityathukral/SpotiGit.git
+   cd SpotiGit
    ```
 
 2. **Install dependencies:**
 
    ```bash
-   npm install
    cd client
    npm install
    cd ..
+   cd server
+   npm install
    ```
 
 3. **Set up environment variables:**
